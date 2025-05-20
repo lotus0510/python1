@@ -2,7 +2,10 @@ name: 測試定時執行 Python
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # 每 5 分鐘執行一次（測試用）
+    - cron: '*/5 * * * *'  # 每5分鐘執行一次（測試用）
+  workflow_dispatch:  # 加上這行，啟用手動執行
+
+
 
 jobs:
   run-python:
