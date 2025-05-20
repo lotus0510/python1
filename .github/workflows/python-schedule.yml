@@ -20,4 +20,4 @@ jobs:
           python-version: '3.10'
 
       - name: 執行 Python
-        run: it1.py
+        run: python it1.py
