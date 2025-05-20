@@ -1,0 +1,22 @@
+name: 測試定時執行 Python
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # 每 5 分鐘執行一次（測試用）
+
+jobs:
+  run-python:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 執行 Python
+        run: |
+          echo "print('Hello from GitHub Actions!')" > test.py
+          python test.py
