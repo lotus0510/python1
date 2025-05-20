@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
+      - name: 安裝相依套件
+        run: pip install requests
       - name: 執行 Python
         run: python it1.py
