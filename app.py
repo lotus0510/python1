@@ -7,8 +7,8 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 app = Flask(__name__)
 
 # 建議改用環境變數管理
-line_bot_api = LineBotApi('你的LINE Channel Access Token')
-handler = WebhookHandler('你的LINE Channel Secret')
+line_bot_api = LineBotApi('cu72CgnyjjlIHApWysa0NSyC0KVlp6+WGUfxMdlMH7g7muGvSAPzr2zXAsgBiS9yEkNuOoAoePqzB08Sho+9/9L/A74UFR+Pw8C2ghER9vDbqH7ky4TgctUBr321/OoNML2oAI9BC/QfmmuWaowMegdB04t89/1O/w1cDnyilFU=')
+handler = WebhookHandler('de3344d7fe3af2ae40a4f4d88581fba3')
 
 def ai_chat(contents: str) -> str:
     """
@@ -16,7 +16,7 @@ def ai_chat(contents: str) -> str:
     - contents: 傳入要讓 AI 回答的提示文字
     - 回傳 AI 回覆文字
     """
-    gemini_key = '你的Google Gemini API Key'
+    gemini_key = 'AIzaSyD2Ce5f2yJ1oBJ0juuDIPuciQySkTg0uVk'
     from google import genai
 
     client = genai.Client(api_key=gemini_key)
