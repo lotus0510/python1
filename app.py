@@ -46,25 +46,51 @@ def webhook():
         abort(400)
     return 'OK'
 
-
+user_histories = {}
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     """
     接收使用者訊息後，呼叫 ai_chat 函式取得 AI 回覆，
     並用 LINE Bot 回傳給使用者
     """
-    received_text = event.message.text
+    user_id = event.source.user_id  # 取得使用者唯一ID，用來區分不同對話
+    received_text = event.message.text  # 使用者傳來的訊息文字
 
-    # 你可以在這裡加上系統提示詞，讓 AI 回答更符合需求
-    prompt = f"請用繁體中文回覆，依台北地區，語氣輕鬆自然，像朋友聊天。內容簡單好懂，適合用在 LINE 裡顯示，不要 Markdown。以下是使用者的訊息：{received_text}"
+    # 若第一次聊天，初始化此使用者的歷史訊息串列
+    if user_id not in user_histories:
+        user_histories[user_id] = []
+
+    # 將使用者本次訊息加入歷史紀錄 (格式: User: 訊息)
+    user_histories[user_id].append(f"User: {received_text}")
+
+    # 將整個歷史訊息合併成一個字串，作為 prompt 給 AI
+    history_text = "\n".join(user_histories[user_id])
+
+    # 系統提示詞，讓 AI 回答更符合需求
+    prompt1 = "請使用繁體中文回答，除非有特殊需求，否則不要使用其他語言。"
+    prompt2 = "語氣輕鬆自然，像朋友聊天。內容簡單好懂"
+    prompt3 = "不要有特殊的格式,不要有奇怪的符號"
+
+    # 將系統提示與歷史對話串接
+    prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
 
     try:
+        # 呼叫 AI 取得回覆
         ai_response = ai_chat(prompt)
     except Exception as e:
-        # 若呼叫 AI 失敗，回覆錯誤訊息
+        # 若呼叫失敗，回傳錯誤訊息給使用者
         ai_response = "抱歉，AI 服務暫時無法使用，請稍後再試。"
 
-    # 回覆給使用者
+    # 把 AI 回覆加入歷史，方便下一輪繼續對話
+    user_histories[user_id].append(f"AI: {ai_response}")
+
+    # 限制歷史訊息長度，避免無限累積造成負擔
+    max_history = 10  # 保留最近10輪對話
+    # 一輪包含使用者和AI各一條訊息，總共20條
+    if len(user_histories[user_id]) > max_history * 2:
+        user_histories[user_id] = user_histories[user_id][-max_history * 2:]
+
+    # 使用 LINE Bot API 回覆使用者
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=ai_response)
