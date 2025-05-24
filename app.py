@@ -72,16 +72,19 @@ def handle_message(event):
 
     # 系統提示詞，讓 AI 回答更符合需求
     prompt1 = "請使用繁體中文回答，除非有特殊需求，否則不要使用其他語言。"
-    prompt2 = "語氣輕鬆自然，像朋友聊天。內容簡單好懂"
+    prompt2 = "語氣輕鬆自然，像朋友聊天。內容簡單好懂，沒有特殊要求不要有太長的回覆"
     prompt3 = "不要有特殊的格式,不要有奇怪的符號"
-
+    
     # 將系統提示與歷史對話串接
-    prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
+    base_prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
 
     keywords = ["天氣", "天氣資訊", "天氣預報", "氣象","氣候"]
+    ai_response = ""
     if received_text and any(keyword in received_text for keyword in keywords):
         ai_response = weather_info()
-        prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\n{ai_response}AI:"
+        prompt = f"{base_prompt}\n{ai_response}\nAI:"
+    else:
+        prompt = base_prompt
 
     try:
         # 呼叫 AI 取得回覆
