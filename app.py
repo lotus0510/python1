@@ -125,7 +125,7 @@ def handle_message(event):
     else:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=f"{ai_response},ai_response_type:{ai_response_type}")")
+            TextSendMessage(text=f"{ai_response},ai_response_type:{ai_response_type}")
         )
 
 
