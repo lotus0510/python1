@@ -68,9 +68,9 @@ def handle_message(event):
     # 將系統提示與歷史對話串接
     base_prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
     
-    ai_response = ai_chat(contents=f'判段使用者詢問的項目: {received_text}\n回覆:"weather" 或是"other"')
-    if ai_response == "weather":
-        ai_response = ""
+    ai_response_type = ai_chat(contents=f'判段使用者詢問的項目: {received_text}\n回覆:"weather" 或是"other"')
+    if ai_response_type == "weather":
+        ai_response = weather_info()
         prompt = f"{base_prompt}\n{ai_response}\nAI:"
     else:
         prompt = base_prompt
@@ -109,7 +109,7 @@ def handle_message(event):
     # 使用 LINE Bot API 回覆使用者
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=ai_response)
+        TextSendMessage(text=f"{ai_response},ai_response_type:{ai_response_type}")
     )
 
 
