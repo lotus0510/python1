@@ -71,7 +71,7 @@ def handle_message(event):
     history_text = "\n".join(user_histories[user_id])
 
     # 系統提示詞，讓 AI 回答更符合需求
-    prompt1 = "請使用繁體中文回答，除非有特殊需求，否則不要使用其他語言。"
+    prompt1 = "預設繁體中文回答，如有要求可使用其他語言回答，或是根據使用者語言進行變化。"
     prompt2 = "語氣輕鬆自然，像朋友聊天。內容簡單好懂，沒有特殊要求不要有太長的回覆"
     prompt3 = "不要有特殊的格式,不要有奇怪的符號"
     
