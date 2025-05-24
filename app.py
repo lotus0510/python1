@@ -60,6 +60,21 @@ def handle_message(event):
     user_id = event.source.user_id  # 取得使用者唯一ID，用來區分不同對話
     received_text = event.message.text  # 使用者傳來的訊息文字
     received_text = received_text.lower()
+    
+    prompt1 = "預設繁體中文回答，如有要求可使用其他語言回答，或是根據使用者語言進行變化。"
+    prompt2 = "語氣輕鬆自然，像朋友聊天。內容簡單好懂，沒有特殊要求不要有太長的回覆"
+    prompt3 = "不要有特殊的格式,不要有奇怪的符號"
+    
+    # 將系統提示與歷史對話串接
+    base_prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
+    
+    ai_response = ai_chat(contents=f'判段使用者詢問的項目: {received_text}\n回覆:"weather" 或是"other"')
+    if ai_response == "weather":
+        ai_response = ""
+        prompt = f"{base_prompt}\n{ai_response}\nAI:"
+    else:
+        prompt = base_prompt
+    
 
     # 若第一次聊天，初始化此使用者的歷史訊息串列
     if user_id not in user_histories:
@@ -72,20 +87,8 @@ def handle_message(event):
     history_text = "\n".join(user_histories[user_id])
 
     # 系統提示詞，讓 AI 回答更符合需求
-    prompt1 = "預設繁體中文回答，如有要求可使用其他語言回答，或是根據使用者語言進行變化。"
-    prompt2 = "語氣輕鬆自然，像朋友聊天。內容簡單好懂，沒有特殊要求不要有太長的回覆"
-    prompt3 = "不要有特殊的格式,不要有奇怪的符號"
-    
-    # 將系統提示與歷史對話串接
-    base_prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
 
-    keywords = ["天氣", "天氣資訊", "天氣預報", "氣象","氣候","weather"]
-    ai_response = ""
-    if received_text and any(keyword in received_text for keyword in keywords):
-        ai_response = weather_info()
-        prompt = f"{base_prompt}\n{ai_response}\nAI:"
-    else:
-        prompt = base_prompt
+
 
     try:
         # 呼叫 AI 取得回覆
