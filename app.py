@@ -59,6 +59,7 @@ def handle_message(event):
     """
     user_id = event.source.user_id  # 取得使用者唯一ID，用來區分不同對話
     received_text = event.message.text  # 使用者傳來的訊息文字
+    received_text = received_text.lower()
 
     # 若第一次聊天，初始化此使用者的歷史訊息串列
     if user_id not in user_histories:
@@ -78,7 +79,7 @@ def handle_message(event):
     # 將系統提示與歷史對話串接
     base_prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
 
-    keywords = ["天氣", "天氣資訊", "天氣預報", "氣象","氣候"]
+    keywords = ["天氣", "天氣資訊", "天氣預報", "氣象","氣候","weather"]
     ai_response = ""
     if received_text and any(keyword in received_text for keyword in keywords):
         ai_response = weather_info()
