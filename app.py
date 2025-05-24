@@ -11,6 +11,9 @@ app = Flask(__name__)
 line_bot_api = LineBotApi('cu72CgnyjjlIHApWysa0NSyC0KVlp6+WGUfxMdlMH7g7muGvSAPzr2zXAsgBiS9yEkNuOoAoePqzB08Sho+9/9L/A74UFR+Pw8C2ghER9vDbqH7ky4TgctUBr321/OoNML2oAI9BC/QfmmuWaowMegdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('de3344d7fe3af2ae40a4f4d88581fba3')
 
+app_type = "main"
+
+
 def ai_chat(contents: str) -> str:
     """
     呼叫 Google Gemini API 取得 AI 回覆
@@ -113,11 +116,17 @@ def handle_message(event):
     if len(user_histories[user_id]) > max_history * 2:
         user_histories[user_id] = user_histories[user_id][-max_history * 2:]
 
-    # 使用 LINE Bot API 回覆使用者
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=f"{ai_response},ai_response_type:{ai_response_type}")
-    )
+    if app_type == "main":
+            # 使用 LINE Bot API 回覆使用者
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=ai_response)
+        )
+    else:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=f"{ai_response},ai_response_type:{ai_response_type}")")
+        )
 
 
 
