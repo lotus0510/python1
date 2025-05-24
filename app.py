@@ -2,6 +2,7 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+import weather
 
 # 建立 Flask 應用程式
 app = Flask(__name__)
@@ -28,6 +29,9 @@ def ai_chat(contents: str) -> str:
     )
     
     return response.text
+def weather_info():
+    weather_data = weather.get_weather_data()
+    return weather_data
 
 
 @app.route("/", methods=['GET'])
@@ -74,6 +78,11 @@ def handle_message(event):
     # 將系統提示與歷史對話串接
     prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
 
+    keywords = ["天氣", "天氣資訊", "天氣預報", "氣象","氣候"]
+    if received_text and any(keyword in received_text for keyword in keywords):
+        ai_response = weather_info()
+        prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\n{ai_response}AI:"
+
     try:
         # 呼叫 AI 取得回覆
         ai_response = ai_chat(prompt)
@@ -95,6 +104,8 @@ def handle_message(event):
         event.reply_token,
         TextSendMessage(text=ai_response)
     )
+
+
 
 
 if __name__ == "__main__":
