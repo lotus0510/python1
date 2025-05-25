@@ -24,7 +24,7 @@ def ai_chat(contents: str) -> str:
     import vertexai
     from vertexai.generative_models import GenerativeModel
     
-    vertexai.init(project="line-bot-460615", location="us-central1")
+    vertexai.init(project="gen-lang-client-0914953860", location="us-central1")
     model = GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(contents)
     
