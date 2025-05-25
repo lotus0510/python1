@@ -66,7 +66,6 @@ def handle_message(event):
 
     # 將使用者本次訊息加入歷史紀錄 (格式: User: 訊息)
     user_histories[user_id].append(f"User: {received_text}")
-
     # 將整個歷史訊息合併成一個字串，作為 prompt 給 AI
     history_text = "\n".join(user_histories[user_id])
 
@@ -84,20 +83,13 @@ def handle_message(event):
         prompt = f"{base_prompt}\n{weather_data}\nAI:"
     else:
         prompt = base_prompt
-    
-
-
-
-    # 系統提示詞，讓 AI 回答更符合需求
-
-
 
     try:
         # 呼叫 AI 取得回覆
         ai_response = ai_chat(prompt)
     except Exception as e:
         # 若呼叫失敗，回傳錯誤訊息給使用者
-        ai_response = "抱歉，AI 服務暫時無法使用，請稍後再試。"
+        ai_response = f"抱歉，AI 服務暫時無法使用，請稍後再試。\n{e}"
 
     # 把 AI 回覆加入歷史，方便下一輪繼續對話
     user_histories[user_id].append(f"AI: {ai_response}")
@@ -108,18 +100,15 @@ def handle_message(event):
     if len(user_histories[user_id]) > max_history * 2:
         user_histories[user_id] = user_histories[user_id][-max_history * 2:]
 
-    if app_type == "main":
-            # 使用 LINE Bot API 回覆使用者
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=ai_response)
-        )
-    else:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=f"{ai_response},ai_response_type:{ai_response_type}\n{weather_data}")
-        )
 
+    if "test001" in received_text:
+        send_text = f"{ai_response},ai_response_type:{ai_response_type}\n{weather_data}"
+    else:
+        send_text = ai_response
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=send_text)
+    )
 
 
 
