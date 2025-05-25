@@ -70,8 +70,6 @@ def handle_message(event):
     # 將整個歷史訊息合併成一個字串，作為 prompt 給 AI
     history_text = "\n".join(user_histories[user_id])
 
-    # 將使用者本次訊息加入歷史紀錄 (格式: User: 訊息)
-    user_histories[user_id].append(f"User: {received_text}")
 
     prompt1 = "預設繁體中文回答，如有要求可使用其他語言回答，或是根據使用者語言進行變化。"
     prompt2 = "語氣輕鬆自然，像朋友聊天。內容簡單好懂，沒有特殊要求不要有太長的回覆"
