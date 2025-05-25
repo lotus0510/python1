@@ -115,7 +115,6 @@ def handle_message(event):
             TextSendMessage(text=ai_response)
         )
     else:
-        weather_data =""
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=f"{ai_response},ai_response_type:{ai_response_type}\n{weather_data}")
