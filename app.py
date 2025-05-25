@@ -21,15 +21,12 @@ def ai_chat(contents: str) -> str:
     - 回傳 AI 回覆文字
     """
     gemini_key = 'AIzaSyD2Ce5f2yJ1oBJ0juuDIPuciQySkTg0uVk'
-    from google import genai
-
-    client = genai.Client(api_key=gemini_key)
+    import vertexai
+    from vertexai.generative_models import GenerativeModel
     
-    # 呼叫 Gemini 模型生成文字
-    response = client.models.generate_content(
-        model="gemini-2.5-flash-preview-05-20", 
-        contents=contents
-    )
+    vertexai.init(project="line-bot-460615", location="us-central1")
+    model = GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(contents)
     
     return response.text
 def weather_info():
@@ -72,9 +69,6 @@ def handle_message(event):
 
     # 將整個歷史訊息合併成一個字串，作為 prompt 給 AI
     history_text = "\n".join(user_histories[user_id])
-    # 若第一次聊天，初始化此使用者的歷史訊息串列
-    if user_id not in user_histories:
-        user_histories[user_id] = []
 
     # 將使用者本次訊息加入歷史紀錄 (格式: User: 訊息)
     user_histories[user_id].append(f"User: {received_text}")
