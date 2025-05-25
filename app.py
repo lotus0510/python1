@@ -80,8 +80,8 @@ def handle_message(event):
     
     ai_response_type = ai_chat(contents=f'判段使用者詢問的項目: {received_text}\n回覆:"weather" 或是"other"')
     if ai_response_type == "weather":
-        ai_response = weather_info()
-        prompt = f"{base_prompt}\n{ai_response}\nAI:"
+        weather_data = weather_info()
+        prompt = f"{base_prompt}\n{weather_data}\nAI:"
     else:
         prompt = base_prompt
     
@@ -117,7 +117,7 @@ def handle_message(event):
     else:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=f"{ai_response},ai_response_type:{ai_response_type}\n{ai_response}")
+            TextSendMessage(text=f"{ai_response},ai_response_type:{ai_response_type}\n{weather_data}")
         )
 
 
