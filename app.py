@@ -3,6 +3,7 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import weather
+from ai_chat import ai_chat
 
 # 建立 Flask 應用程式
 app = Flask(__name__)
@@ -13,22 +14,6 @@ handler = WebhookHandler('de3344d7fe3af2ae40a4f4d88581fba3')
 
 app_type = "main"
 
-
-def ai_chat(contents: str) -> str:
-    """
-    呼叫 Google Gemini API 取得 AI 回覆
-    - contents: 傳入要讓 AI 回答的提示文字
-    - 回傳 AI 回覆文字
-    """
-    gemini_key = 'AIzaSyD2Ce5f2yJ1oBJ0juuDIPuciQySkTg0uVk'
-    import vertexai
-    from vertexai.generative_models import GenerativeModel
-    
-    vertexai.init(project="gen-lang-client-0914953860", location="us-central1")
-    model = GenerativeModel("gemini-2.0-flash-001")
-    response = model.generate_content(contents)
-    
-    return response.text
 def weather_info():
     weather_data = weather.get_weather_data()
     return weather_data

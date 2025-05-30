@@ -1,3 +1,4 @@
-import weather
+from ai_chat import ai_chat
 
-print(weather.get_weather_data())
+response = ai_chat("你好！幫我寫一首詩。")
+print(response)
