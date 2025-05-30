@@ -3,7 +3,7 @@ import requests
 def ai_chat(contents):
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer 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",
+        "Authorization": "Bearer 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",
         "Content-Type": "application/json"
     }
 
