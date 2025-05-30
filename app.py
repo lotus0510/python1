@@ -63,7 +63,7 @@ def handle_message(event):
     base_prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
     
     ai_response_type = ai_chat(contents=f'判段使用者詢問的項目: {received_text}\n回覆:"weather" 或是"other"')
-    if ai_response_type.strip().lower() == "weather":
+    if ai_response_type['choices'][0]['message']['content'].strip().lower() == "weather":
         weather_data = weather_info()
         prompt = f"{base_prompt}\n{weather_data}\nAI:"
     else:
@@ -87,9 +87,9 @@ def handle_message(event):
 
 
     if "test001" in received_text:
-        send_text = f"{ai_response},ai_response_type:{ai_response_type}\n{weather_data}"
+        send_text = f"{ai_response},ai_response_type:{ai_response_type['choices'][0]['message']['content']}\n{weather_data}"
     else:
-        send_text = ai_response
+        send_text = ai_response['choices'][0]['message']['content']
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=send_text)
