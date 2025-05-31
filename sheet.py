@@ -1,19 +1,26 @@
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import google.auth
+from google.auth.transport.requests import Request
+from google.auth.credentials import Credentials
 
-def write_to_sheet(user_id , received_text, send_text, time,time_now):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-
-    # 載入憑證
-    creds = ServiceAccountCredentials.from_json_keyfile_name("propane-shell-461501-u9-31c047a0e0a8.json", scope)
+def write_to_sheet(user_id, received_text, send_text, time, time_now):
+    # 使用預設憑證（Cloud Run 自動提供）
+    creds, _ = google.auth.default(scopes=[
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ])
+    
     client = gspread.authorize(creds)
 
-    # 開啟 Google Sheet（用標題或 Spreadsheet ID）
+    # 開啟 Google Sheet（用 Spreadsheet ID）
     spreadsheet = client.open_by_key("1vjNr5OTtzSrCzIc7j8MRJBFpt8iO9IvIyWhVociaPOI")
 
     # 選擇工作表
-    worksheet = spreadsheet.sheet1  # 或 spreadsheet.worksheet("工作表名稱")
-    worksheet.append_row([time_now,user_id, received_text, send_text, time])
+    worksheet = spreadsheet.sheet1  # 或指定名稱：spreadsheet.worksheet("Sheet1")
+    
+    # 寫入資料
+    worksheet.append_row([time_now, user_id, received_text, send_text, time])
+
 
 if __name__ == "__main__":
     # 設定授權範圍
