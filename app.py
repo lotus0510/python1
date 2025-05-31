@@ -4,16 +4,19 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import weather
 from ai_chat import ai_chat
+from sheet import write_to_sheet
 import time
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',filename='app.log', filemode='a')
+
+
 # 建立 Flask 應用程式
-start_time = time.time()
 app = Flask(__name__)
 
 # 建議改用環境變數管理
 line_bot_api = LineBotApi('cu72CgnyjjlIHApWysa0NSyC0KVlp6+WGUfxMdlMH7g7muGvSAPzr2zXAsgBiS9yEkNuOoAoePqzB08Sho+9/9L/A74UFR+Pw8C2ghER9vDbqH7ky4TgctUBr321/OoNML2oAI9BC/QfmmuWaowMegdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('de3344d7fe3af2ae40a4f4d88581fba3')
-
-app_type = "main"
 
 def weather_info():
     weather_data = weather.get_weather_data()
@@ -43,6 +46,7 @@ def handle_message(event):
     接收使用者訊息後，呼叫 ai_chat 函式取得 AI 回覆，
     並用 LINE Bot 回傳給使用者
     """
+    start_time = time.time()
     user_id = event.source.user_id  # 取得使用者唯一ID，用來區分不同對話
     received_text = event.message.text  # 使用者傳來的訊息文字
     received_text = received_text.lower()
@@ -63,41 +67,44 @@ def handle_message(event):
     # 將系統提示與歷史對話串接
     base_prompt = f"{prompt1}\n{prompt2}\n{prompt3}\n{history_text}\nAI:"
     
-    ai_response_type = ai_chat(contents=f'判段使用者詢問的項目: {received_text}\n回覆:"weather" 或是"other"')
-    if ai_response_type['choices'][0]['message']['content'].strip().lower() == "weather":
-        weather_data = weather_info()
-        prompt = f"{base_prompt}\n{weather_data}\nAI:"
-    else:
-        prompt = base_prompt
+    
+    # 判斷使用者詢問的項目
+
 
     try:
-        # 呼叫 AI 取得回覆
+        ai_response_type = ai_chat(contents=f'判段使用者詢問的項目: {received_text}\n回覆:"weather" 或是"other"')
+        if ai_response_type['choices'][0]['message']['content'].strip().lower() == "weather":
+            weather_data = weather_info()
+            prompt = f"{base_prompt}\n{weather_data}\nAI:"
+        else:
+            prompt = base_prompt
         ai_response = ai_chat(prompt)
+        send_text = ai_response['choices'][0]['message']['content']
     except Exception as e:
-        # 若呼叫失敗，回傳錯誤訊息給使用者
-        ai_response = f"抱歉，AI 服務暫時無法使用，請稍後再試。\n{e}"
+        ai_response = None
+        send_text = f"抱歉，AI 服務暫時無法使用，請稍後再試。\n{e}"
+        logging.exception("AI 回覆失敗")
 
+    if ai_response is not None:
     # 把 AI 回覆加入歷史，方便下一輪繼續對話
-    user_histories[user_id].append(f"AI: {ai_response}")
-
-    # 限制歷史訊息長度，避免無限累積造成負擔
-    max_history = 10  # 保留最近10輪對話
-    # 一輪包含使用者和AI各一條訊息，總共20條
-    if len(user_histories[user_id]) > max_history * 2:
-        user_histories[user_id] = user_histories[user_id][-max_history * 2:]
-
+        user_histories[user_id].append(f"AI: {send_text}")
+        # 限制歷史訊息長度，避免無限累積造成負擔
+        max_history = 10  # 保留最近10輪對話
+        # 一輪包含使用者和AI各一條訊息，總共20條
+        if len(user_histories[user_id]) > max_history * 2:
+            user_histories[user_id] = user_histories[user_id][-max_history * 2:]
 
     end_time = time.time()
-    print(f"time: {end_time - start_time}")
-
-    if "test001" in received_text:
-        send_text = f"{ai_response},ai_response_type:{ai_response_type['choices'][0]['message']['content']}\n{weather_data}"
-    else:
-        send_text = ai_response['choices'][0]['message']['content']
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=f"{send_text} \n {event.source.user_id} \n 本次花費時間{end_time - start_time:.2f}秒")
     )
+    write_to_sheet(
+        time_now=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+        user_id = event.source.user_id, received_text = received_text, send_text = send_text, time = end_time - start_time)
+    
+    
+    
 
 
 
