@@ -7,6 +7,7 @@ from ai_chat import ai_chat
 from sheet import write_to_sheet
 import time
 import logging
+import traceback
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',filename='app.log', filemode='a')
 
@@ -120,7 +121,7 @@ def handle_message(event):
         info = "資料已寫入 Google Sheet"
     except Exception as e:
         logging.exception("寫入 Google Sheet 失敗")
-        info = f"寫入 Google Sheet 失敗: {e}"
+        info = f"寫入 Google Sheet 失敗: {e}\n{traceback.format_exc()}"
     
     line_bot_api.reply_message(
         event.reply_token,
