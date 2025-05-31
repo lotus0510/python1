@@ -112,13 +112,22 @@ def handle_message(event):
             user_histories[user_id] = user_histories[user_id][-max_history * 2:]
 
     end_time = time.time()
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=f"{send_text} \n {event.source.user_id} \n 本次花費時間{end_time - start_time:.2f}秒")
-    )
-    write_to_sheet(
+    
+    try:
+        write_to_sheet(
         time_now=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
         user_id = event.source.user_id, received_text = received_text, send_text = send_text, time = end_time - start_time)
+        info = "資料已寫入 Google Sheet"
+    except Exception as e:
+        logging.exception("寫入 Google Sheet 失敗")
+        info = f"寫入 Google Sheet 失敗: {e}"
+    
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=f"{send_text} \n {event.source.user_id} \n 本次花費時間{end_time - start_time:.2f}秒"
+                        + f"\n{info}")
+    )
+
     
     
     

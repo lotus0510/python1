@@ -2,6 +2,8 @@ import gspread
 import google.auth
 from google.auth.transport.requests import Request
 from google.auth.credentials import Credentials
+from oauth2client.service_account import ServiceAccountCredentials
+
 
 def write_to_sheet(user_id, received_text, send_text, time, time_now):
     # 使用預設憑證（Cloud Run 自動提供）
