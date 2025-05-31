@@ -4,8 +4,9 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import weather
 from ai_chat import ai_chat
-
+import time
 # 建立 Flask 應用程式
+start_time = time.time()
 app = Flask(__name__)
 
 # 建議改用環境變數管理
@@ -86,13 +87,16 @@ def handle_message(event):
         user_histories[user_id] = user_histories[user_id][-max_history * 2:]
 
 
+    end_time = time.time()
+    print(f"time: {end_time - start_time}")
+
     if "test001" in received_text:
         send_text = f"{ai_response},ai_response_type:{ai_response_type['choices'][0]['message']['content']}\n{weather_data}"
     else:
         send_text = ai_response['choices'][0]['message']['content']
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=send_text)
+        TextSendMessage(text=f"{send_text} \n {event.source.user_id} \n 本次花費時間{end_time - start_time:.2f}秒")
     )
 
 

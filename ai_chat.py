@@ -18,4 +18,4 @@ def ai_chat(contents):
     return(response.json())
 
 if __name__ == "__main__":
-    print(ai_chat("你好！幫我寫一首詩。"))
+    print(ai_chat("你好！幫我寫一首詩。")['choices'][0]['message']['content'])
