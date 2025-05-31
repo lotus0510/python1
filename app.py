@@ -21,6 +21,25 @@ handler = WebhookHandler('de3344d7fe3af2ae40a4f4d88581fba3')
 def weather_info():
     weather_data = weather.get_weather_data()
     return weather_data
+def weather_condition(receiver_text):
+    zh_keywords = [
+    "天氣", "氣溫", "溫度", "雨", "晴", "陰", "颱風", "雷", "風", "濕度",
+    "氣象", "氣壓", "冷", "熱", "雪", "太陽", "曬", "霧", "霜", "鋒面",
+    "寒流", "暖流", "悶熱", "溫差"
+    ]
+    en_keywords = [
+    "weather", "temperature", "rain", "sun", "sunny", "cloud", "cloudy", "storm",
+    "typhoon", "thunder", "wind", "humidity", "cold", "hot", "snow", "fog", "frost",
+    "pressure", "forecast", "heatwave", "chilly", "warm"
+    ]
+    ja_keywords = [
+    "天気", "気温", "温度", "雨", "晴れ", "曇り", "台風", "雷", "風", "湿度",
+    "寒い", "暑い", "雪", "霧", "霜", "気圧", "予報", "日差し", "寒波", "熱波"
+    ]
+    weather_keywords = zh_keywords + en_keywords + ja_keywords
+    return any (keyword in receiver_text for keyword in weather_keywords)
+
+
 
 
 @app.route("/", methods=['GET'])
@@ -69,11 +88,8 @@ def handle_message(event):
     
     
     # 判斷使用者詢問的項目
-
-
     try:
-        ai_response_type = ai_chat(contents=f'判段使用者詢問的項目: {received_text}\n回覆:"weather" 或是"other"')
-        if ai_response_type['choices'][0]['message']['content'].strip().lower() == "weather":
+        if weather_condition(received_text):
             weather_data = weather_info()
             prompt = f"{base_prompt}\n{weather_data}\nAI:"
         else:
@@ -81,9 +97,10 @@ def handle_message(event):
         ai_response = ai_chat(prompt)
         send_text = ai_response['choices'][0]['message']['content']
     except Exception as e:
-        ai_response = None
+        logging.exception("天氣資訊獲取失敗")
         send_text = f"抱歉，AI 服務暫時無法使用，請稍後再試。\n{e}"
-        logging.exception("AI 回覆失敗")
+        ai_response = None
+
 
     if ai_response is not None:
     # 把 AI 回覆加入歷史，方便下一輪繼續對話

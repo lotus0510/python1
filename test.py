@@ -1,11 +1,16 @@
-import requests
-
-api_key = "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"
-headers = {
-    "Authorization": f"Bearer {api_key}"
-}
-
-response = requests.get("https://openrouter.ai/api/v1/auth/key", headers=headers)
-data = response.json()
-
-print(data)
+zh_keywords = [
+"天氣", "氣溫", "溫度", "雨", "晴", "陰", "颱風", "雷", "風", "濕度",
+"氣象", "氣壓", "冷", "熱", "雪", "太陽", "曬", "霧", "霜", "鋒面",
+"寒流", "暖流", "悶熱", "溫差"
+]
+en_keywords = [
+"weather", "temperature", "rain", "sun", "sunny", "cloud", "cloudy", "storm",
+"typhoon", "thunder", "wind", "humidity", "cold", "hot", "snow", "fog", "frost",
+"pressure", "forecast", "heatwave", "chilly", "warm"
+]
+ja_keywords = [
+"天気", "気温", "温度", "雨", "晴れ", "曇り", "台風", "雷", "風", "湿度",
+"寒い", "暑い", "雪", "霧", "霜", "気圧", "予報", "日差し", "寒波", "熱波"
+]
+weather_keywords = zh_keywords + en_keywords + ja_keywords
+print(weather_keywords)
