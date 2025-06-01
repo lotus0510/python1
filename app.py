@@ -71,6 +71,7 @@ def handle_message(event):
     message_id = event.message.id
     if message_id in processed_messages:
         return
+    processed_messages.add(message_id)
     
     start_time = time.time()
     user_id = event.source.user_id  # 取得使用者唯一ID，用來區分不同對話
