@@ -1,6 +1,11 @@
 import requests
 
 def ai_chat(contents):
+    """
+    contents : str
+    負責傳入詢問ai的prompt
+    """
+    
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Authorization": "Bearer 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",
