@@ -8,6 +8,7 @@ from sheet import write_to_sheet
 import time
 import logging
 import traceback
+import threading
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 processed_messages = set()
@@ -53,11 +54,12 @@ def webhook():
     signature = request.headers.get('X-Line-Signature', '')
     body = request.get_data(as_text=True)
 
+
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
         abort(400)
-    return 'OK'
+    return 'OK',200
 
 user_histories = {}
 @handler.add(MessageEvent, message=TextMessage)
