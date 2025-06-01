@@ -9,7 +9,7 @@ import time
 import logging
 import traceback
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',filename='app.log', filemode='a')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 # 建立 Flask 應用程式
