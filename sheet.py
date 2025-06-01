@@ -5,7 +5,7 @@ from google.auth.credentials import Credentials
 from oauth2client.service_account import ServiceAccountCredentials
 
 
-def write_to_sheet(user_id, received_text, send_text, time, time_now):
+def write_to_sheet(user_id, received_text, send_text, time, time_now,message_id):
     # 使用預設憑證（Cloud Run 自動提供）
     creds, _ = google.auth.default(scopes=[
         "https://www.googleapis.com/auth/spreadsheets",
@@ -21,7 +21,7 @@ def write_to_sheet(user_id, received_text, send_text, time, time_now):
     worksheet = spreadsheet.sheet1  # 或指定名稱：spreadsheet.worksheet("Sheet1")
     
     # 寫入資料
-    worksheet.append_row([time_now, user_id, received_text, send_text, time])
+    worksheet.append_row([time_now, user_id, received_text, send_text, time,message_id])
 
 
 if __name__ == "__main__":

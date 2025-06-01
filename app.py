@@ -10,7 +10,7 @@ import logging
 import traceback
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
+processed_messages = set()
 
 # 建立 Flask 應用程式
 app = Flask(__name__)
@@ -66,6 +66,10 @@ def handle_message(event):
     接收使用者訊息後，呼叫 ai_chat 函式取得 AI 回覆，
     並用 LINE Bot 回傳給使用者
     """
+    message_id = event.message.id
+    if message_id in processed_messages:
+        return
+    
     start_time = time.time()
     user_id = event.source.user_id  # 取得使用者唯一ID，用來區分不同對話
     received_text = event.message.text  # 使用者傳來的訊息文字
@@ -117,7 +121,7 @@ def handle_message(event):
     try:
         write_to_sheet(
         time_now=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-        user_id = event.source.user_id, received_text = received_text, send_text = send_text, time = end_time - start_time)
+        user_id = event.source.user_id, received_text = received_text, send_text = send_text, time = end_time - start_time,message_id=message_id)
         info = "資料已寫入 Google Sheet"
     except Exception as e:
         logging.exception("寫入 Google Sheet 失敗")
