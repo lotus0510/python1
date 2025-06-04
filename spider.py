@@ -40,6 +40,20 @@ def get_weather_data():
                 cleaned_data.append(row)
     return cleaned_data
 
+def get_news_data():
+    url = "https://gnews.io/api/v4/top-headlines"
+    params = {
+        'lang': 'zh',
+        'country': 'tw',
+        'token': '5187873e23573c0212fd3db788c9fab2'
+    }
+    response = requests.get(url, params=params)
+    data = response.json()
+    return data
+
+
+
+
 if __name__ == "__main__":
     cleaned_data = get_weather_data()
     # 印出適合 AI 使用的 JSON 格式（前 5 筆）

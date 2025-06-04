@@ -19,6 +19,12 @@ def weather_condition(receiver_text):
     weather_keywords = zh_keywords + en_keywords + ja_keywords
     return any (keyword in receiver_text for keyword in weather_keywords)
 
+def news_condition(receiver_text):
+    """
+    新聞提示詞,return True or false
+    """
+    return "新聞" in receiver_text or "news" in receiver_text.lower()
+
 class PromptBuilder:
     def __init__(self,history_message):
         self.conversation_history = history_message
@@ -27,8 +33,10 @@ class PromptBuilder:
             "語氣輕鬆自然，像朋友聊天。內容簡單好懂，沒有特殊要求不要有太長的回覆",
             "不要有特殊的格式,不要有奇怪的符號",
         ]
-    def build_prompt(self,user_message,weather_data=None):
+    def build_prompt(self,user_message,weather_data=None,news_data=None):
         system_instructions = "\n".join(self.prompts)
         if weather_data:
             user_message = f"{weather_data}, {user_message}"
+        if news_data:
+            user_message = f"{news_data}, {user_message}"
         return f"{system_instructions}\n{self.conversation_history}\nAI:{user_message}"

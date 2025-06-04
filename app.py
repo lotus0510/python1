@@ -2,13 +2,14 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-import weather
+import spider
 from ai_chat import ai_chat
 from sheet import write_to_sheet
 import time
 import logging
 import traceback
 import app_data
+import spider
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 processed_messages = set()
 user_histories = {}
@@ -21,12 +22,6 @@ app = Flask(__name__)
 line_bot_api = LineBotApi('cu72CgnyjjlIHApWysa0NSyC0KVlp6+WGUfxMdlMH7g7muGvSAPzr2zXAsgBiS9yEkNuOoAoePqzB08Sho+9/9L/A74UFR+Pw8C2ghER9vDbqH7ky4TgctUBr321/OoNML2oAI9BC/QfmmuWaowMegdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('de3344d7fe3af2ae40a4f4d88581fba3')
 
-def weather_info():
-    """
-    爬蟲獲取天氣資訊
-    """
-    weather_data = weather.get_weather_data()
-    return weather_data
 
 
 
@@ -77,11 +72,14 @@ def handle_message(event):
     # 判斷使用者詢問的項目
     try:
         if app_data.weather_condition(received_text):
-            weather_data = weather_info()
+            weather_data = spider.get_weather_data()
             full_prompt = base_prompt.build_prompt(user_message=received_text, weather_data=weather_data)
-            
+        elif app_data.news_condition(received_text):
+            news_data = spider.get_news_data()
+            full_prompt = base_prompt.build_prompt(user_message=received_text, news_data=news_data)
         else:
             full_prompt = base_prompt.build_prompt(user_message=received_text)
+            
         ai_response = ai_chat(full_prompt)
         send_text = ai_response['choices'][0]['message']['content']
     except Exception as e:
@@ -112,8 +110,7 @@ def handle_message(event):
     
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=f"{send_text} \n {event.source.user_id} \n 本次花費時間{end_time - start_time:.2f}秒"
-                        + f"\n{info}")
+        TextSendMessage(text=f"{send_text}")
     )
 
     
