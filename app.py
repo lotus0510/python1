@@ -72,7 +72,7 @@ def handle_message(event):
     base_prompt = app_data.PromptBuilder(history_text)
     # 判斷使用者詢問的項目
     try:
-        if received_text == "僅限服務者使用功能":
+        if received_text == "僅開發者使用功能" and user_id == "U82040bf54df534cb1a6935b60f228eaa":
             calendar_data = google_server.get_calendar_events()
             full_prompt = base_prompt.build_prompt(user_message="", calendar_data=calendar_data)
         elif app_data.weather_condition(received_text):
