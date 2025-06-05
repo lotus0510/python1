@@ -68,7 +68,7 @@ def get_calendar_events():
     time_max = end_of_month.isoformat()
 
     # === 指定日曆 ID（必須事先授權給 Cloud Run Service Account）===
-    calendar_id = 'your_calendar_id@group.calendar.google.com'  # 或使用 gmail.com
+    calendar_id = '9qt3c06n1h0u0rcuvf6plir5p0j5rkqn@import.calendar.google.com'  # 或使用 gmail.com
 
     # === 擷取事件 ===
     events_result = service.events().list(
