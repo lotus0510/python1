@@ -80,13 +80,14 @@ def get_calendar_events():
     ).execute()
 
     events = events_result.get('items', [])
-
+    all_events = []
     # === 輸出每筆事件為 [標題, 開始時間, 結束時間] ===
     for event in events:
         title = event.get('summary', '（無標題）')
         start = event['start'].get('dateTime', event['start'].get('date'))
         end = event['end'].get('dateTime', event['end'].get('date'))
-        return([title, start, end])
+        all_events.append([title, start, end])
+    return(all_events)
     
 def test_get_calendar_events():
 # === 認證與建立服務 ===
@@ -119,10 +120,11 @@ def test_get_calendar_events():
     ).execute()
 
     events = events_result.get('items', [])
-
+    all_events = []
     # === 格式化並輸出每筆事件 ['標題', '開始時間', '結束時間'] ===
     for event in events:
         title = event.get('summary', '（無標題）')
         start_time = event['start'].get('dateTime', event['start'].get('date'))
         end_time = event['end'].get('dateTime', event['end'].get('date'))
-        print([title, start_time, end_time])
+        all_events.append([title, start_time, end_time])
+    return(all_events)
