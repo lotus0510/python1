@@ -36,10 +36,12 @@ class PromptBuilder:
             "不要有特殊的格式,不要有奇怪的符號",
             f"現在時間是{datetime.now(ZoneInfo('Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S')}"
         ]
-    def build_prompt(self,user_message,weather_data=None,news_data=None):
+    def build_prompt(self,user_message,weather_data=None,news_data=None,calendar_data=None):
         system_instructions = "\n".join(self.prompts)
         if weather_data:
             user_message = f"{weather_data}, {user_message}"
         if news_data:
             user_message = f"{news_data}, {user_message}"
+        if calendar_data:
+            user_message = f"我接下來的行程安排有哪些?請根據以下行程回答{calendar_data}, {user_message}"
         return f"{system_instructions}\n{self.conversation_history}\nAI:{user_message}"

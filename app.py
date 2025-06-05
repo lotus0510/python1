@@ -4,7 +4,8 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import spider
 from ai_chat import ai_chat
-from sheet import write_to_sheet
+from google_server import write_to_sheet
+import google_server
 import time
 import logging
 import traceback
@@ -71,7 +72,10 @@ def handle_message(event):
     base_prompt = app_data.PromptBuilder(history_text)
     # 判斷使用者詢問的項目
     try:
-        if app_data.weather_condition(received_text):
+        if received_text == "僅限服務者使用功能":
+            calendar_data = google_server.get_calendar_events()
+            full_prompt = base_prompt.build_prompt(user_message="", calendar_data=calendar_data)
+        elif app_data.weather_condition(received_text):
             weather_data = spider.get_weather_data()
             full_prompt = base_prompt.build_prompt(user_message=received_text, weather_data=weather_data)
         elif app_data.news_condition(received_text):
@@ -83,7 +87,7 @@ def handle_message(event):
         ai_response = ai_chat(full_prompt)
         send_text = ai_response['choices'][0]['message']['content']
     except Exception as e:
-        logging.exception("天氣資訊獲取失敗")
+        logging.exception("資訊獲取失敗")
         send_text = f"抱歉，AI 服務暫時無法使用，請稍後再試。\n{e}"
         ai_response = None
 
