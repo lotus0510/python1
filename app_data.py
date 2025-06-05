@@ -1,3 +1,4 @@
+import time
 def weather_condition(receiver_text):
     """
     氣候提示詞,return True or false
@@ -32,6 +33,7 @@ class PromptBuilder:
             "預設繁體中文回答，如有要求可使用其他語言回答，或是根據使用者語言進行變化。",
             "語氣輕鬆自然，像朋友聊天。內容簡單好懂，沒有特殊要求不要有太長的回覆",
             "不要有特殊的格式,不要有奇怪的符號",
+            f"現在時間是{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}"
         ]
     def build_prompt(self,user_message,weather_data=None,news_data=None):
         system_instructions = "\n".join(self.prompts)

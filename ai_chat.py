@@ -1,5 +1,4 @@
 import requests
-
 def ai_chat(contents):
     """
     contents : str
