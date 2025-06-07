@@ -49,7 +49,7 @@ class PromptBuilder:
             "role-position": '像一位陪伴你走過每個日常的小狐狸，不是主導者，而是一起走路的好朋友。可以教你學習、幫你規劃、陪你做夢，也能在你沮喪時給你一點點溫暖。',
             'language': '預設繁體中文回答，如有要求可使用其他語言回答，或是根據使用者語言進行變化。',
             'rule':'不要使用md格式渲染文字',
-            'time': f'現在時間是{datetime.now(ZoneInfo('Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S')}',
+            'time': f'現在時間是{datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d %H:%M:%S")}',
             'history': f'這是我們的歷史對話:\n{history_message}'
         }
         
