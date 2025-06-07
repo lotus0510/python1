@@ -161,13 +161,13 @@ def handle_message(event):
         manager.send_text = ai_response['choices'][0]['message']['content']
     except Exception as e:
         logging.exception("資訊獲取失敗")
-        send_text = f"抱歉，AI 服務暫時無法使用，請稍後再試。\n{e}"
+        manager.send_text = f"抱歉，AI 服務暫時無法使用，請稍後再試。\n{e}"
         ai_response = None
 
 
     if ai_response is not None:
     # 把 AI 回覆加入歷史，方便下一輪繼續對話
-        manager.user_histories[manager.user_id].append(f"AI: {send_text}")
+        manager.user_histories[manager.user_id].append(f"AI: {manager.send_text}")
         # 限制歷史訊息長度，避免無限累積造成負擔
         max_history = 10  # 保留最近10輪對話
         # 一輪包含使用者和AI各一條訊息，總共20條
