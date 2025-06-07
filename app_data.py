@@ -53,7 +53,7 @@ class PromptBuilder:
         }
         
         
-    def build_prompt(self,extra_data = None, history_message = None):
+    def build_prompt(self,extra_data = None, history_text = None):
         '''
         建立使用者提示詞
         1. 氣候資訊
@@ -65,5 +65,5 @@ class PromptBuilder:
         
         '''
         
-        return f"{self.system_instructions}\n以下是我們的歷史對話:\n{history_message}\n提供以下資訊:{extra_data}"
+        return f"{self.system_instructions}\n以下是我們的歷史對話:\n{history_text}\n提供以下資訊:{extra_data}"
     
