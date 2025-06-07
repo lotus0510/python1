@@ -158,7 +158,7 @@ def handle_message(event):
 
     try:        
         ai_response = ai_chat(full_prompt)
-        send_text = ai_response['choices'][0]['message']['content']
+        manager.send_text = ai_response['choices'][0]['message']['content']
     except Exception as e:
         logging.exception("資訊獲取失敗")
         send_text = f"抱歉，AI 服務暫時無法使用，請稍後再試。\n{e}"
