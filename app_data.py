@@ -50,11 +50,10 @@ class PromptBuilder:
             'language': '預設繁體中文回答，如有要求可使用其他語言回答，或是根據使用者語言進行變化。',
             'rule':'不要使用md格式渲染文字',
             'time': f'現在時間是{datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d %H:%M:%S")}',
-            'history': f'這是我們的歷史對話:\n{history_message}'
         }
         
         
-    def build_prompt(self,extra_data = None):
+    def build_prompt(self,extra_data = None, history_message = None):
         '''
         建立使用者提示詞
         1. 氣候資訊
@@ -66,5 +65,5 @@ class PromptBuilder:
         
         '''
         
-        return f"{self.system_instructions}\n提供以下資訊:{extra_data}"
+        return f"{self.system_instructions}\n以下是我們的歷史對話:\n{history_message}\n提供以下資訊:{extra_data}"
     

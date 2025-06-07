@@ -141,17 +141,20 @@ def webhook():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    manager.message_id = event.message.id
+    if manager.message_id_check(manager.message_id):
+        return
+    
     start_time = time.time()
     """
     接收使用者訊息後，呼叫 ai_chat 函式取得 AI 回覆，
     並用 LINE Bot 回傳給使用者
     """
-    manager.message_id = event.message.id
     manager.user_id = event.source.user_id
     manager.received_text = event.message.text.lower()
     manager.received_text_process()
     extra_data = received_analysis.received_text_type(manager.received_text)
-    full_prompt = bundle_prompt.build_prompt(extra_data=extra_data)
+    full_prompt = bundle_prompt.build_prompt(extra_data=extra_data,history_text=manager.history_text)
 
     try:        
         ai_response = ai_chat(full_prompt)
