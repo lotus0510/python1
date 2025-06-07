@@ -11,10 +11,106 @@ import logging
 import traceback
 import app_data
 import spider
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-processed_messages = set()
-user_histories = {}
+from enum import Enum
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class TextType(Enum):
+    weather = "weather"
+    news = "news"
+    calendar = "calendar"
+    other = "other"
+
+class VariableManager():
+    def __init__(self):
+        self.message_id_set = set() # 記錄已處理過的訊息ID
+        self.user_histories = {} # 記錄使用者歷史訊息(順便紀錄此id是否有過紀錄)
+        
+        self.user_id = None # 記錄使用者ID
+        self.received_text = None # 記錄使用者傳來的訊息文字
+        self.send_text = None # 記錄AI回覆的訊息文字
+        self.time = None # 記錄處理時間
+        self.message_id = None # 記錄訊息ID
+        self.time_now = None # 記錄時間
+        self.history_text = None # 記錄歷史訊息
+    
+    def message_id_check(self, message_id):
+        """
+        檢查訊息ID是否已處理過
+        如果已處理過，則返回True
+        如果未處理過，則將訊息ID加入已處理過的集合，並返回False
+        """
+        
+        if message_id in self.message_id_set:
+            return True
+        else:
+            self.message_id_set.add(message_id)
+            return False
+    def received_text_process(self):
+        '''
+        處理使用者傳來的訊息文字
+        1. 將使用者傳來的訊息文字轉換為小寫
+        2. 如果使用者ID不在使用者歷史訊息串列中，則初始化使用者歷史訊息串列
+        3. 將使用者本次訊息加入歷史紀錄 (格式: User: 訊息)
+        4. 將整個歷史訊息合併成一個字串，作為 prompt 給 AI
+        '''
+        
+        self.received_text = self.received_text.lower() # 將使用者傳來的訊息文字轉換為小寫
+        
+        # 如果使用者ID不在使用者歷史訊息串列中，則初始化使用者歷史訊息串列
+        if self.user_id not in self.user_histories:
+            self.user_histories[self.user_id] = []
+        
+        # 將使用者本次訊息加入歷史紀錄 (格式: User: 訊息)
+        self.user_histories[self.user_id].append(f"User: {self.received_text}")
+        
+        # 將整個歷史訊息合併成一個字串，作為 prompt 給 AI
+        self.history_text = "\n".join(self.user_histories[self.user_id])
+class ReceivedAnalysis():
+    def __init__(self):
+        zh_keywords = [
+            "天氣", "氣溫", "溫度", "雨", "晴", "陰", "颱風", "雷", "風", "濕度",
+            "氣象", "氣壓", "冷", "熱", "雪", "太陽", "曬", "霧", "霜", "鋒面",
+            "寒流", "暖流", "悶熱", "溫差"
+            ]
+        en_keywords = [
+        "weather", "temperature", "rain", "sun", "sunny", "cloud", "cloudy", "storm",
+        "typhoon", "thunder", "wind", "humidity", "cold", "hot", "snow", "fog", "frost",
+        "pressure", "forecast", "heatwave", "chilly", "warm"
+        ]
+        ja_keywords = [
+        "天気", "気温", "温度", "雨", "晴れ", "曇り", "台風", "雷", "風", "湿度",
+        "寒い", "暑い", "雪", "霧", "霜", "気圧", "予報", "日差し", "寒波", "熱波"
+        ]
+        self.weather_keywords = zh_keywords + en_keywords + ja_keywords
+        self.news_keywords = ["新聞", "news"]
+        self.calendar_keywords = ["行程", "schedule", "行程表", "行程規劃", "行程安排",'僅開發者使用功能']
+    def received_text_type(self,received_text):
+        '''
+        判斷使用者傳來的訊息文字屬於哪一種類型
+        1. 氣候資訊
+        2. 新聞資訊
+        3. 行程資訊
+        '''
+        if any(keyword in received_text for keyword in self.weather_keywords):
+            weather_data = spider.get_weather_data()
+            return weather_data
+        elif any(keyword in received_text for keyword in self.news_keywords):
+            news_data = spider.get_news_data()
+            return news_data
+        elif any(keyword in received_text for keyword in self.calendar_keywords) and manager.user_id == "U82040bf54df534cb1a6935b60f228eaa":
+            calendar_data = google_server.get_calendar_events()
+            return calendar_data
+        else:
+            return None
+            
+            
+            
+        
+
+manager = VariableManager()
+received_analysis = ReceivedAnalysis()
+bundle_prompt = app_data.PromptBuilder(manager.history_text)
 
 # 建立 Flask 應用程式
 app = Flask(__name__)
@@ -45,45 +141,19 @@ def webhook():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    start_time = time.time()
     """
     接收使用者訊息後，呼叫 ai_chat 函式取得 AI 回覆，
     並用 LINE Bot 回傳給使用者
     """
-    message_id = event.message.id
-    if message_id in processed_messages:
-        return
-    processed_messages.add(message_id)
-    
-    start_time = time.time()
-    user_id = event.source.user_id  # 取得使用者唯一ID，用來區分不同對話
-    received_text = event.message.text  # 使用者傳來的訊息文字
-    received_text = received_text.lower()
-    # 若第一次聊天，初始化此使用者的歷史訊息串列
-    if user_id not in user_histories:
-        user_histories[user_id] = []
+    manager.message_id = event.message.id
+    manager.user_id = event.source.user_id
+    manager.received_text = event.message.text.lower()
+    manager.received_text_process()
+    extra_data = received_analysis.received_text_type(manager.received_text)
+    full_prompt = bundle_prompt.build_prompt(extra_data=extra_data)
 
-    # 將使用者本次訊息加入歷史紀錄 (格式: User: 訊息)
-    user_histories[user_id].append(f"User: {received_text}")
-    # 將整個歷史訊息合併成一個字串，作為 prompt 給 AI
-    history_text = "\n".join(user_histories[user_id])
-
-    
-    
-    base_prompt = app_data.PromptBuilder(history_text)
-    # 判斷使用者詢問的項目
-    try:
-        if received_text == "僅開發者使用功能" and user_id == "U82040bf54df534cb1a6935b60f228eaa":
-            calendar_data = google_server.get_calendar_events()
-            full_prompt = base_prompt.build_prompt(user_message="", calendar_data=calendar_data)
-        elif app_data.weather_condition(received_text):
-            weather_data = spider.get_weather_data()
-            full_prompt = base_prompt.build_prompt(user_message=received_text, weather_data=weather_data)
-        elif app_data.news_condition(received_text):
-            news_data = spider.get_news_data()
-            full_prompt = base_prompt.build_prompt(user_message=received_text, news_data=news_data)
-        else:
-            full_prompt = base_prompt.build_prompt(user_message=received_text)
-            
+    try:        
         ai_response = ai_chat(full_prompt)
         send_text = ai_response['choices'][0]['message']['content']
     except Exception as e:
@@ -94,19 +164,19 @@ def handle_message(event):
 
     if ai_response is not None:
     # 把 AI 回覆加入歷史，方便下一輪繼續對話
-        user_histories[user_id].append(f"AI: {send_text}")
+        manager.user_histories[manager.user_id].append(f"AI: {send_text}")
         # 限制歷史訊息長度，避免無限累積造成負擔
         max_history = 10  # 保留最近10輪對話
         # 一輪包含使用者和AI各一條訊息，總共20條
-        if len(user_histories[user_id]) > max_history * 2:
-            user_histories[user_id] = user_histories[user_id][-max_history * 2:]
+        if len(manager.user_histories[manager.user_id]) > max_history * 2:
+            manager.user_histories[manager.user_id] = manager.user_histories[manager.user_id][-max_history * 2:]
 
     end_time = time.time()
     
     try:
         write_to_sheet(
         time_now=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-        user_id = event.source.user_id, received_text = received_text, send_text = send_text, time = end_time - start_time,message_id=message_id)
+        user_id = manager.user_id, received_text = full_prompt, send_text = manager.send_text, time = end_time - start_time,message_id=manager.message_id)
         info = "資料已寫入 Google Sheet"
     except Exception as e:
         logging.exception("寫入 Google Sheet 失敗")
@@ -114,7 +184,7 @@ def handle_message(event):
     
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=f"{send_text}")
+        TextSendMessage(text=f"{manager.send_text}")
     )
 
     

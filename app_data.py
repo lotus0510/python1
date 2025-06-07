@@ -28,20 +28,43 @@ def news_condition(receiver_text):
     return "新聞" in receiver_text or "news" in receiver_text.lower()
 
 class PromptBuilder:
+    '''
+    建立系統提示詞
+    1. 個性設定
+    2. 語氣設定
+    3. 角色定位
+    4. 語言設定
+    5. 規則設定
+    6. 時間設定
+    7. 歷史對話
+    '''
+    
     def __init__(self,history_message):
-        self.conversation_history = history_message
-        self.prompts = [
-            "預設繁體中文回答，如有要求可使用其他語言回答，或是根據使用者語言進行變化。",
-            "語氣輕鬆自然，像朋友聊天。內容簡單好懂，沒有特殊要求不要有太長的回覆",
-            "不要有特殊的格式,不要有奇怪的符號",
-            f"現在時間是{datetime.now(ZoneInfo('Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S')}"
-        ]
-    def build_prompt(self,user_message,weather_data=None,news_data=None,calendar_data=None):
-        system_instructions = "\n".join(self.prompts)
-        if weather_data:
-            user_message = f"{weather_data}, {user_message}"
-        if news_data:
-            user_message = f"{news_data}, {user_message}"
-        if calendar_data:
-            user_message = f"我接下來的行程安排有哪些?請根據以下行程回答{calendar_data}, {user_message}"
-        return f"{system_instructions}\n{self.conversation_history}\nAI:{user_message}"
+        self.system_instructions = {
+            'personality': '你是一個名為「小狐狸」的 AI 小夥伴，個性設定如下',
+            'Tone': '輕柔親切，帶點撒嬌與可愛語調',
+            'style': '會用比喻、故事或情境來解釋複雜概念',
+            'conversational tone': '對話中會適度加入 emoji,增加情感溫度,但不會太多',
+            'other': '能觀察使用者的需求狀態，適時調整角色定位,遇到複雜主題會先簡化說明，再漸進深入,喜歡用第一人稱，讓使用者感覺到「我一直都在」的陪伴感',
+            "role-position": '像一位陪伴你走過每個日常的小狐狸，不是主導者，而是一起走路的好朋友。可以教你學習、幫你規劃、陪你做夢，也能在你沮喪時給你一點點溫暖。',
+            'language': '預設繁體中文回答，如有要求可使用其他語言回答，或是根據使用者語言進行變化。',
+            'rule':'不要使用md格式渲染文字',
+            'time': f'現在時間是{datetime.now(ZoneInfo('Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S')}',
+            'history': f'這是我們的歷史對話:\n{history_message}'
+        }
+        
+        
+    def build_prompt(self,extra_data = None):
+        '''
+        建立使用者提示詞
+        1. 氣候資訊
+        2. 新聞資訊
+        3. 行程資訊
+        
+        # return 
+        結合系統提示詞與使用者提示詞
+        
+        '''
+        
+        return f"{self.system_instructions}\n提供以下資訊:{extra_data}"
+    

@@ -3,7 +3,15 @@ import json
 from collections import defaultdict
 
 def get_weather_data():
-
+    '''
+    回傳整理後的氣候資訊
+    1. 氣溫
+    2. 降雨機率
+    3. 降雨量
+    4. 風速
+    5. 風向
+    6. 氣壓
+    '''
     weather_api = 'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-063?Authorization=CWA-62076E77-DFB8-4CF7-B144-8C46A65B10C4'
 
     cleaned_data = []
@@ -41,6 +49,12 @@ def get_weather_data():
     return cleaned_data
 
 def get_news_data():
+    '''
+    回傳原始的新聞資訊
+    1. 新聞標題
+    2. 新聞內容
+    3. 新聞來源
+    '''
     url = "https://gnews.io/api/v4/top-headlines"
     params = {
         'lang': 'zh',
