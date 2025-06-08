@@ -152,9 +152,17 @@ def handle_message(event):
     """
     manager.user_id = event.source.user_id
     manager.received_text = event.message.text.lower()
-    manager.received_text_process()
-    extra_data = received_analysis.received_text_type(manager.received_text)
-    full_prompt = bundle_prompt.build_prompt(extra_data=extra_data,history_text=manager.history_text)
+    time1 = time.time() # 基礎資訊處理
+    
+    manager.received_text_process()  # 處理使用者傳來的訊息文字，使其與歷史資訊結合
+    time2 = time.time() 
+    
+    extra_data = received_analysis.received_text_type(manager.received_text)  # 判斷使用者傳來的訊息文字屬於哪一種類型(是否需要額外資訊)
+    time3 = time.time()
+    
+    full_prompt = bundle_prompt.build_prompt(extra_data=extra_data,history_text=manager.history_text)  # 建立使用者提示詞
+    time4 = time.time()
+
 
     try:        
         ai_response = ai_chat(full_prompt)
@@ -163,6 +171,7 @@ def handle_message(event):
         logging.exception("資訊獲取失敗")
         manager.send_text = f"抱歉，AI 服務暫時無法使用，請稍後再試。\n{e}"
         ai_response = None
+    time5 = time.time()
 
 
     if ai_response is not None:
@@ -174,16 +183,43 @@ def handle_message(event):
         if len(manager.user_histories[manager.user_id]) > max_history * 2:
             manager.user_histories[manager.user_id] = manager.user_histories[manager.user_id][-max_history * 2:]
 
-    end_time = time.time()
+    time6 = time.time()
+    # manager_time={
+    #     '基礎資訊處理' : time1 - start_time,
+    #     '使用者訊息處理': time2 - time1,    
+    #     '判斷使用者傳來的訊息文字屬於哪一種類型': time3 - time2,
+    #     '建立使用者提示詞': time4 - time3,
+    #     'ai資訊獲取': time5 - time4,
+    #     '回覆資訊處理': time6 - time5
+    # }
     
+    
+        
+    MAX_CELL_LENGTH = 50000
+
+    def truncate(text):
+        return text[:MAX_CELL_LENGTH - 1000] + "...[內容過長已截斷]" if len(text) > MAX_CELL_LENGTH else text
+
     try:
         write_to_sheet(
-        time_now=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-        user_id = manager.user_id, received_text = full_prompt, send_text = manager.send_text, time = end_time - start_time,message_id=manager.message_id)
+            time_now=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            user_id = manager.user_id,
+            received_text = truncate(full_prompt),
+            send_text = truncate(manager.send_text),
+            time = time6 - start_time,
+            message_id=manager.message_id,
+            time1=time1-start_time,
+            time2 = time2-time1,
+            time3 = time3-time2,
+            time4 = time4-time3,
+            time5 = time5-time4,
+            time6 = time6-time5
+        )
         info = "資料已寫入 Google Sheet"
     except Exception as e:
         logging.exception("寫入 Google Sheet 失敗")
         info = f"寫入 Google Sheet 失敗: {e}\n{traceback.format_exc()}"
+
     
     line_bot_api.reply_message(
         event.reply_token,

@@ -10,7 +10,7 @@ import calendar
 import google.auth
 
 
-def write_to_sheet(user_id, received_text, send_text, time, time_now,message_id):
+def write_to_sheet(user_id, received_text, send_text, time, time_now,message_id,time1,time2,time3,time4,time5,time6):
     # 使用預設憑證（Cloud Run 自動提供）
     creds, _ = google.auth.default(scopes=[
         "https://www.googleapis.com/auth/spreadsheets",
@@ -26,7 +26,7 @@ def write_to_sheet(user_id, received_text, send_text, time, time_now,message_id)
     worksheet = spreadsheet.sheet1  # 或指定名稱：spreadsheet.worksheet("Sheet1")
     
     # 寫入資料
-    worksheet.append_row([time_now, user_id, received_text, send_text, time,message_id])
+    worksheet.append_row([time_now, user_id, received_text, send_text, time,message_id,time1,time2,time3,time4,time5,time6])
 def test_write_to_sheet():
     # 設定授權範圍
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
