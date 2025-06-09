@@ -141,9 +141,11 @@ def webhook():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    
     manager.message_id = event.message.id
     if manager.message_id_check(manager.message_id):
         return
+    
     
     start_time = time.time()
     """
@@ -152,6 +154,8 @@ def handle_message(event):
     """
     manager.user_id = event.source.user_id
     manager.received_text = event.message.text.lower()
+        
+    
     time1 = time.time() # 基礎資訊處理
     
     manager.received_text_process()  # 處理使用者傳來的訊息文字，使其與歷史資訊結合
