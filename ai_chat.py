@@ -1,4 +1,7 @@
 import requests
+
+
+
 def ai_chat(contents):
     """
     contents : str
@@ -12,7 +15,7 @@ def ai_chat(contents):
     }
 
     data = {
-        "model": "deepseek/deepseek-chat-v3-0324:free",  # 或 "anthropic/claude-3-haiku", "mistral/mistral-7b-instruct" 等
+        "model": "google/gemini-2.0-flash-exp:free",  # 或 "anthropic/claude-3-haiku", "mistral/mistral-7b-instruct" 等
         "messages": [
             {"role": "user", "content": contents}
         ]
